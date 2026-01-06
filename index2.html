@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kenangan Untuk Bapak Kajari</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #1a472a; 
+            --accent-color: #d4af37; 
+            --bg-color: #f4f4f4;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* 1. OVERLAY DENGAN FOTO KANTOR */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.3)), 
+                        url('img/kantor.jpg'); 
+            background-size: cover;
+            background-position: center;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            transition: opacity 1s ease;
+        }
+
+        #overlay h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            margin-bottom: 25px;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.8);
+            padding: 0 20px;
+        }
+
+        /* 2. CONTAINER UTAMA */
+        .container {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            max-width: 500px;
+            width: 90%;
+            border-top: 10px solid var(--accent-color);
+            position: relative;
+            z-index: 1;
+        }
+
+        h1 { font-family: 'Playfair Display', serif; color: var(--primary-color); margin-bottom: 0.5rem; }
+        p.subtitle { color: #666; font-size: 0.9rem; margin-bottom: 2rem; }
+
+        /* AREA PESAN DENGAN AUTO-SCROLL */
+        .quote-area {
+            min-height: 200px;
+            max-height: 350px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #fffdf5;
+            border-radius: 15px;
+            border: 1px inset #f0e6c2;
+        }
+
+        /* Menghaluskan scrollbar */
+        .quote-area::-webkit-scrollbar { width: 5px; }
+        .quote-area::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
+
+        #message { 
+            font-size: 1.2rem; 
+            font-style: italic; 
+            color: #333; 
+            line-height: 1.6; 
+            transition: opacity 0.4s, font-size 0.3s; 
+        }
+
+        #sender { 
+            margin-top: 1.5rem; 
+            font-weight: 600; 
+            color: var(--primary-color); 
+            font-size: 0.95rem; 
+            transition: opacity 0.4s; 
+        }
+
+        /* TOMBOL-TOMBOL */
+        .btn-main {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 16px 40px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(26, 71, 42, 0.4);
+            font-weight: 600;
+        }
+
+        .btn-main:hover { background-color: var(--accent-color); transform: translateY(-3px); }
+
+        .btn-overlay {
+            background-color: var(--accent-color);
+            color: white;
+            border: 2px solid white;
+            padding: 14px 35px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .btn-overlay:hover { transform: scale(1.1); background-color: white; color: var(--primary-color); }
+
+        #music-control {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            font-size: 1.3rem;
+            opacity: 0.4;
+            transition: opacity 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="overlay">
+        <h2>Terima Kasih Bapak Banu Laksmana, S.H., LL.M.</h2>
+        <button class="btn-overlay" onclick="startApp()">Buka Pesan</button>
+    </div>
+
+    <audio id="bgMusic" loop>
+        <source src="musik.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="container">
+        <div id="music-control" onclick="toggleMusic()">🔊</div>
+        <h1>Kata Mereka...</h1>
+        <p class="subtitle">Pesan & Kesan Pegawai untuk Bapak Kajari</p>
+
+        <div class="quote-area" id="quoteBox">
+            <div id="message">Memuat pesan...</div>
+            <div id="sender"></div>
+        </div>
+
+        <button class="btn-main" onclick="tampilkanPesan()">Pesan Berikutnya</button>
+    </div>
+
+    <script>
+        const audio = document.getElementById('bgMusic');
+        const overlay = document.getElementById('overlay');
+        const messageElement = document.getElementById('message');
+        const senderElement = document.getElementById('sender');
+
+        let currentIndex = 0; // Melacak urutan pesan
+
+        const daftarPesan = [
+            { pesan: "Terima kasih Bapak atas semua bimbingan  dan  arahannya karena telah menjadi mentor yang luar biasa buat saya,  kepemimpinan Bapak  selalu kami rindukan. Semoga setiap langkah Bapak selalu dalam lindungan Allah SWT  dan membawah kesuksesan  dan kebahagiaan ……. Aamiin  YRA", nama: "— Ajus (Pembinaan)" },
+            { pesan: "Pesan : Selamat bertugas ditempat baru bapak, jangan lupakan kami yang dibulukumba,semoga sukses selalu, dilimpahkan reseki, kebahagiaan dan ketenangan hati bersama keluarga  kesan : Bapak  adalah atasan yang paling asik dan gaul yang saya kenal, bapak selalu bisa berbaur dan bersosialisasi dengan semua orang tanpa memandang  usia dan latar belakang , semoga bapak bisa terus asik dan gaul ditempat tugas yg baru", nama: "— Sinar alam (bidang pembinaan)" },
+            { pesan: "Terima kasih, Bapak  Banu Laksmana atas nakhoda kepemimpinan yang selama ini mengarahkan kami. Di Cimahi nanti, saya yakin tangan dingin Bapak akan tetap membawa perubahan, sebagaimana Bapak telah meninggalkan jejak bermakna di bumi Panrita Lopi ini.", nama: "— Refah (Kasubsi Datun)" },
+            { pesan: "Terima kasih atas bimbingan, arahan, dan kebersamaan Bapak selama bertugas di sini. Bapak adalah pimpinan yang baik, bertanggung jawab, sederhana, dan sangat dekat dengan kami semua—sosok yang benar-benar akan kami rindukan. Semoga amanah di satuan kerja baru sebagai Kepala Kejaksaan Negeri Cimahi selalu diberi kelancaran, kesehatan, dan kesuksesan. Sukses selalu untuk karier Bapak, fly so high di Kejaksaan. 🙏  Fly as high as leaders can go, Guide justice with wisdom and glow. May you reach the highest rank one day, And please don’t forget to take us along the way. 😊", nama: "— Eky kasubsi tut pidsus" },
+            { pesan: "Pesan “Semoga Sukses Selalu menyertai langkah Bapak diamanah barunya sebagai Kajari Cimahi dan terus menjadi teladan”, Kesan” Terima kasih atas arahan dan bimbingan  Bapak Selama menjadi Kajari di Bulukumba dan kami akan selalu mengenang kepemimpinan bapak yg penuh bijak, semoga perjalanan karier bapak kedepan semakin sukses  dan tetap berada dalam Lindungan Allah SWT”.", nama: "— ST. RAMLAH, SH" },
+            { pesan: "Sukses selalu Pak Kajari dan Ibu Kartika. Selalu jadi pimpinan atau pribadi yang sederhana dan menginspirasi🫡🫡", nama: "— Rusydi (JF Pidsus)" },
+            { pesan: "Terima kasih banyak bapak sudah menjadi pemimpin yang baik, yang senantiasa mendengarkan keluh kesah anggotanya, dan selalu memberikan saran dan solusi terbaik… semoga bapak sukses selalu, selalu dikelilingi orang2 yang baik, selalu di lindungi sama Allah swt, dan selalu di beri kebahagiaan, amiin😇🙏", nama: "— Fisiko Dewi (pidsus)" },
+            { pesan: "Izin bapak. Saya berterima kasih atas bimbingan bapak selama menjabat sebagai Kejari Bulukumba. Sebagai jaksa baru, saya juga berterima kasih kepada bapak yang menjadi telah role model kami. Sukses selalu bapak🙏🙏", nama: "— M. Zaki (Pidum)" },
+            { pesan: "Kesan : Selama bertugas , bapak memimpin sangat rendah hati, terbuka, mudah diajak berdiskusi, dan bijaksana. Arahan dan pendekatan bapak membuat kami merasa dihargai dan termotivasi dalam bekerja. Bimbingan serta gaya kepemimpinan bapak juga memberikan suasana kerja yang positif.  Pesan : Semoga sukses dan amanah di tempat yang baru, Pak. Terima kasih atas bimbingan dan kerja sama yang telah terjalin. Jangan lupakan kami ya Pak. ", nama: "— Silvya Kasri Ramadhani (Sekretariat)" },
+            { pesan: "Selamat dan sukses ditempat tugas yang baru…sehat selalu beserta keluarga 🤲terima kasih atas bimbingan dan kepemimpinan dan ilmu yang diberikan serta semua kebaikan bapak selama kurang lebih 1 tahun 5 Bulan  sebagai Kajari Bulukumba …Anti minta maaf kalau ada khilaf yg anti sengaja maupun yg tidak disengaja👏jangan lupakan kami di Bulukumba😭😭😭selamat jalan bapak semoga semakin sukses kedepannya…Aamiin Yarabbal Aalamiin🤲😭😭😭. Nda ada lagi chat bapak yg minta kopi….”Bu Anti Kopi Boleh”😭😭😭", nama: "— Anti (Sekretariat)" },
+            { pesan: "Terimakasih atas arahan, bimbingan, dan jalan-jalannya selama menjabat sebagai Kajari Bulukumba Bapak, semoga sehat dan sukses selalu sekeluarga dan bisa bertemu kembali di lain kesempatan Aaamiin 🙏😇", nama: "— Rifky (PAPBB)" },
+            { pesan: "Selamat Bapak Banu Laksmana, S.H., LL.M. atas mutasinya menjadi Kejari Cimahi. Terimakasih atas dedikasinya bpk selama menjadi Kejari Bulukumba. Sehat dan sukses selalu di tempat baru. Aamiin Allahummah Aamiin 🤲🏻😇", nama: "— Renny A Rachman (Bidang Pembinaan)" },
+            { pesan: "Terima kasih Bapak telah memimpin dengan hati dan keteladanan. Semoga kebaikan selalu menyertai setiap perjalanan Bapak", nama: "— Nella (bidang Pembinaan)" },
+            { pesan: "Selamat dan sukses bapak di tempat barunya... ", nama: "— Wahyuni (Pidsus)" },
+            { pesan: "Pesan untuk Bapak Kepala Kejaksaan Negeri Bulukumba  Yang Terhormat Bapak Kepala Kejaksaan Negeri Bulukumba,  Dengan rasa hormat dan kesedihan yang mendalam, kami menyampaikan ucapan selamat atas penugasan baru sebagai Kepala Kejaksaan Negeri Cimahi. Selama masa jabatan di Bulukumba, Bapak telah meninggalkan jejak emas yang tak tergantikan dari penegakan hukum yang tegas namun penuh rasa keadilan, hingga upaya membangun sinergi dengan berbagai pihak untuk kesejahteraan masyarakat. Setiap kasus yang ditangani dengan penuh kehati-hatian, setiap bantuan yang diberikan kepada yang tertindas, selalu mengingatkan kita akan komitmen Bapak terhadap kebenaran.  Kami berharap Bapak selalu diberikan kesehatan, kekuatan, dan kebijaksanaan dalam menjalankan tugas baru. Semoga jejak keadilan Bapak terus menyebar di tanah Cimahi, seperti yang telah dilakukan di Bulukumba.  Kesan Kesan yang abadi dari Bapak adalah sosok pemimpin yang hangat, penuh empati, dan teguh prinsip. Bapak tidak hanya memimpin dengan otoritas, tetapi juga dengan contoh yang menginspirasi. Masa jabatan Bapak di Bulukumba akan selalu dikenang sebagai masa di mana keadilan semakin terasa, dan harapan bagi masyarakat semakin berkobar. Selamat bertugas, Bapak semoga sukses selalu.", nama: "— ROSITA AYU SETYARI UTAMI (Datun)" },
+            { pesan: "Selamat Bertugas di Tempat Baru, Bapak.  Pergi ke pasar membeli mangga, Singgah sebentar membeli ikan. Walau singkat Bapak di Bulukumba, Banyak kenangan sulit dilupakan. Terima kasih yang sebesar-besarnya atas segala bimbingan, dedikasi, dan teladan yang Bapak berikan selama menjabat sebagai Kejari Bulukumba. Meski singkat, namun kehadiran Bapak telah memberikan kesan yang tak terlupakan bagi saya. Semoga Bapak sekeluarga senantiasa diberikan kesehatan, kebahagiaan, dan kesuksesan yang berlimpah di tempat penugasan yang baru.", nama: "— Devi (bidang Datun)" },
+            { pesan: "Bapak, terima kasih telah menjadi pemimpin yang tidak hanya memberi arahan, tetapi juga teladan. Ketegasan Bapak membangun disiplin kami, dan kebijaksanaan Bapak membentuk karakter kami. Jejak kepemimpinan Bapak akan selalu kami kenang dan kami lanjutkan.  “Pemimpin sejati bukan yang paling banyak bicara, tetapi yang tindakannya paling banyak memberi arti.”  Semoga Bapak selalu diberi kesehatan, keberkahan, dan kesuksesan dalam setiap langkah pengabdian.", nama: "— Alan Bidang Pidsus" },
+            { pesan: "Pesan  Terima kasih yang sebesar-besarnya kami sampaikan kepada Bapak atas dedikasi, pengabdian, serta kepemimpinan yang telah Bapak berikan selama bertugas di lingkungan Kejaksaan. Arahan, kebijakan, dan keteladanan Bapak menjadi pedoman berharga bagi kami dalam menjalankan tugas dan tanggung jawab. Semoga di tempat tugas yang baru, Bapak senantiasa diberikan kesehatan, kelancaran, serta kesuksesan dalam mengemban amanah. Semoga di pertemukan kembali.  Kesan  Bapak merupakan sosok pimpinan yang tegas, berintegritas, dan menjunjung tinggi profesionalisme serta nilai-nilai penegakan hukum. Di bawah kepemimpinan Bapak, kinerja dan disiplin kerja kami semakin meningkat. Jejak pengabdian dan keteladanan Bapak akan selalu kami kenang dan menjadi inspirasi bagi kami.", nama: "— Adit (bidang Pidsus)" },
+            { pesan: "Terima kasih atas kepemimpinan Bapak di Kejari Bulukumba. Sukses selalu di tempat yang baru", nama: "— Vinaa (Pembinaan)" },
+            { pesan: "Terima kasih atas dedikasi dan kebaikan selama ini. Semoga di tempat tugas baru semakin maju dan membawa manfaat yang lebih luas, yang baik** kita bawa ke satker y baru, n y tidak baik kita tingglkan.mii pak... sekali lagi terimakasih banyk pak.. kepergianta  disatker saat ini sngt terasa kehilangn.. sehtl sllki sma keluarga pokok.a semua do'a terbaik untk kita.. ", nama: "— Magfhi (bidang pembinaan)" },
+            { pesan: "Terima kasih atas bimbingan Bapak, Kami akan merindukan kepemimpinan Bapak, Semoga sukses selalu menyertai langkah bapak di tempat tugas yang Baru 🙏🏻", nama: "— Mei ( Bidang Datun)" },
+            { pesan: "Assalamualaikum bapak, terimakasih yah bapak sudah jadi teladan buat kami khususnya para CPNS 2025, terimakasih bapak atas dedikasinya dan kesabarannya selama di kejari bulkum, bapak pokoknya harus sehat dan sukses selalu….selamat atas jabatan barunya bapak di kejari cimahi….semoga bapak dan keluarga diberikan kelancaran atas segala aktivitasnya. Makasih yah pak, bapak kok baik sekali…sedih rasanya bapak pindahh…maaf yahh pak jikalau ada tingkah ku yg kurang baik selala bapak menjabat. Ohiya bapak, terimaaksih sudah menjadi atasan/kajari yang sangat baik dan menyayangi para pegawainya. Terimakasih atas nasihat, pembelajaran dan pengalamannya. Bapak sehat” yahh oteyy. Terimakasih bapak…terimakasih banyak😭😭☹️🙏🏻🙏🏻🙏🏻", nama: "— Firah (Pembinaan/Perencana Keahlian)" },
+            { pesan: "Izin bapak, Sebelumnya saya ucapkan banyak terima kasih karna bagi saya, Bapak bukan sekadar pimpinan, tetapi juga sosok mentor yang sangat luar biasa. Dedikasi Bapak dalam membenahi bidang PAPBB benar-benar menjadi standar baru bagi kami. Terima kasih atas segala arahan dan bantuannya selama ini, terutama saat kami menghadapi kendala di bidang PAPBB. Bapak selalu punya solusi praktis yang sangat membantu pekerjaan kami. Semoga di tempat penugasan yang baru, Bapak semakin sukses dan terus menginspirasi. Jangan lupakan kami di sini khususnya pada bidang papbb, dan semoga silaturahmi kita tetap terjaga meski jarak memisahkan.", nama: "— Taufiq Hidayat (bidang PAPBB)" },
+            { pesan: "tetap selalu menjadi orang baik bapak, dan menjadi suritauladan bagi banyak orang. kesan bertemu bapak dengan kesederhanaan yang dimiliki, baik ke semua orang, dan pintar,. terima kasih bapak atas ilmunya semoga kariernya semakin tinggi, sehat selalu serta selalu dalam lindungan Allah SWT. Aamiin YRA.", nama: "— Muhammad Taufik Hawadi (Bidang Pembinaan)" },
+            { pesan: "Assalamualaikum bapak, terima kasih atas segala edukasi dan kebaikan yang telah diberikan, terima kasih atas petunjuk yang telah diarahkan, dan semoga sukses sampai puncak tertinggi, sampai jumpa diwaktu sukses lainnya bapak🙏🏼", nama: "— Azizah (bidang pidum)" },
+            { pesan: "Izin terima kasih bapak🙏🏻 semoga sehat dan sukses selalu", nama: "— Risna (pidum)" },
+            { pesan: "Selamat atas Jabatan Bapak sebagai Kajari Cimahi. Terima kasih Bapak atas bimbingan, arahan, dan kebaikan Bapak selama ini. Sy mohon maaf apabila terdapat kesalahan serta kekuarangan sy dalam menjalankan tupoksi selama Bapak menjadi Pemimpin di Kejari Bulukumba. Bapak adalah sosok pemimpin yang sangat menginspirasi dan mengajarkan sy banyak hal. Sekali lagi terima kasih banyak Bapak. Dimanapun Bapak berada, semoga Bapak dan keluarga selalu dalam lindungan Allah SWT. Aamiin YRA. Web sederhana ini merupakan inovasi sy yang terakhir untuk Bapak, semoga Bapak suka dan selalu ingat dengan Keluarga besar Kejaksaan Negeri Bulukumba. Sehat, bahagia, dan sukses selalu Bapak.", nama: "— Rischa (Pembinaan)" },
+        ];
+
+        function startApp() {
+            audio.play().catch(e => console.log("Audio play blocked"));
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                tampilkanPesan(); // Munculkan pesan pertama otomatis
+            }, 1000);
+        }
+
+        function tampilkanPesan() {
+            messageElement.style.opacity = 0;
+            senderElement.style.opacity = 0;
+
+            setTimeout(() => {
+                const data = daftarPesan[currentIndex];
+                const teksBaru = data.pesan;
+                
+                // LOGIKA AUTO-RESIZE FONT
+                if (teksBaru.length > 250) {
+                    messageElement.style.fontSize = "0.9rem";
+                } else if (teksBaru.length > 150) {
+                    messageElement.style.fontSize = "1.05rem";
+                } else {
+                    messageElement.style.fontSize = "1.25rem";
+                }
+
+                messageElement.innerText = `"${teksBaru}"`;
+                senderElement.innerText = data.nama;
+                
+                messageElement.style.opacity = 1;
+                senderElement.style.opacity = 1;
+                
+                // Scroll kembali ke atas kotak jika pesan panjang
+                document.getElementById('quoteBox').scrollTop = 0;
+                // Naikkan index untuk klik berikutnya
+                currentIndex++;
+                if (currentIndex >= daftarPesan.length) {
+                    currentIndex = 0; // Kembali ke pesan pertama setelah selesai
+                }
+            }, 400);
+        }
+
+        function toggleMusic() {
+            const icon = document.getElementById('music-control');
+            if (audio.paused) {
+                audio.play();
+                icon.innerText = "🔊";
+            } else {
+                audio.pause();
+                icon.innerText = "🔈";
+            }
+        }
+    </script>
+</body>
+</html>
